@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Google Fonts already linked in index.html ── */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --surface-950: 9 10 14;
+    --surface-900: 15 17 23;
+    --surface-800: 22 27 34;
+    --surface-750: 28 33 40;
+    --surface-700: 33 38 45;
+    --surface-600: 48 54 61;
+    --surface-500: 72 79 88;
+    --surface-400: 110 118 129;
+    --surface-300: 139 148 158;
+    --surface-200: 191 199 210;
+    --surface-100: 219 226 234;
+    --surface-50: 244 247 251;
+    --accent-600: 184 128 43;
+    --accent-500: 224 171 68;
+    --accent-400: 237 191 104;
+    --accent-300: 245 214 150;
+    --evalbar-track: 42 42 42;
+    --evalbar-dark-fill: 92 98 109;
+    --evalbar-light-from: 232 230 227;
+    --evalbar-light-to: 200 196 190;
+    --evalbar-divider: 139 148 158;
+  }
+
+  html.light {
+    color-scheme: light;
+    --surface-950: 78 62 46;
+    --surface-900: 242 236 226;
+    --surface-800: 235 228 217;
+    --surface-750: 229 221 209;
+    --surface-700: 218 208 193;
+    --surface-600: 191 177 159;
+    --surface-500: 157 141 123;
+    --surface-400: 122 107 91;
+    --surface-300: 98 84 71;
+    --surface-200: 85 72 60;
+    --surface-100: 71 60 50;
+    --surface-50: 54 45 38;
+    --accent-600: 120 77 49;
+    --accent-500: 145 95 62;
+    --accent-400: 168 115 78;
+    --accent-300: 193 146 108;
+    --evalbar-track: 214 202 186;
+    --evalbar-dark-fill: 116 92 72;
+    --evalbar-light-from: 245 239 227;
+    --evalbar-light-to: 224 206 176;
+    --evalbar-divider: 157 141 123;
+  }
+
+  html {
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  body {
+    @apply bg-surface-900 text-surface-50;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  /* Panel card */
+  .panel {
+    @apply bg-surface-800 rounded-xl border border-surface-600 p-4;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-surface-600;
+  }
+}
+
+/* ── Custom scrollbar ─────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #3d3e45;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f0a500;
+}
+
+/* ── Range input ──────────────────────────────────── */
+input[type='range'] {
+  -webkit-appearance: none;
+  height: 4px;
+  background: #313238;
+  border-radius: 2px;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+  transition: box-shadow 0.15s;
+}
+input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+}
+
+/* ── Eval bar pulse animation ─────────────────────── */
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── Sidebar tab active indicator ─────────────────── */
+.tab-active {
+  @apply text-accent-500 border-b-2 border-accent-500;
+}
+
+/* ── react-chessboard overrides ───────────────────── */
+[data-testid='chessboard'] {
+  border-radius: 4px;
+  overflow: hidden;
+}

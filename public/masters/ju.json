@@ -1,0 +1,77 @@
+{
+  "id": "ju",
+  "name": "Ju Wenjun",
+  "source": "Chess-Results / FIDE Women’s World Rapid Championships 2024",
+  "games": [
+    {
+      "id": "ju-1",
+      "event": "FIDE Women’s World Rapid Championships 2024",
+      "site": "New York, USA",
+      "date": "27.12.2024",
+      "round": "",
+      "white": "Tan, Zhongyi",
+      "black": "Ju, Wenjun",
+      "result": "0-1",
+      "eco": "",
+      "opening": "Women’s Rapid World Championship",
+      "openingGroup": "Women’s Rapid World Championship",
+      "pgn": "[Event \"FIDE Women’s World Rapid Championships 2024\"]\n[Site \"New York, USA\"]\n[Date \"27.12.2024\"]\n[Round \"?\"]\n[White \"Tan, Zhongyi\"]\n[Black \"Ju, Wenjun\"]\n[Result \"0-1\"]\n[WhiteElo \"2502\"]\n[BlackElo \"2536\"]\n\n1.d4 Nf6 2.c4 e6 3.Nf3 d5 4.Nc3 Bb4 5.Qa4+ Nc6 6.e3 O-O 7.Qc2 Bxc3+ 8.Qxc3 Ne4 9.Qb3 a5 10.Bd3 Nb4 11.Bb1 c5 12.O-O cxd4 13.exd4 dxc4 14.Qxc4 Nd6 15.Qc5 Nd5 16.Bg5 f6 17.Qc2 g6 18.Bd2 Bd7 19.Re1 Rc8 20.Qd1 Qb6 21.Bc1 a4 22.a3 Nc4 23.Qe2 Na5 24.Bh6 Rf7 25.Bd3 Nb3 26.Rad1 Qd6 27.g3 Re8 28.Qc2 Ne7 29.Bf4 Qc6 30.Qe2 Nd5 31.Bh6 Qd6 32.Nh4 Nxd4 33.Qe4 e5 34.Bc4 Ne7 35.Bxf7+ Kxf7 36.Be3 Bc6 37.Qg4 h5 38.Qh3 Qd5 39.f3 Nxf3+ 40.Kf2 Nd4 41.Bxd4 exd4 42.Qg2 Qc5 43.Nf3 d3+ 44.Kf1 Nf5 45.Qf2 Rxe1+ 46.Rxe1 Qd5 47.Ng1 d2 48.Rd1 Bb5+ 49.Ne2 Qh1+ 50.Qg1 Ne3+ 0-1"
+    },
+    {
+      "id": "ju-2",
+      "event": "FIDE Women’s World Rapid Championships 2024",
+      "site": "New York, USA",
+      "date": "27.12.2024",
+      "round": "",
+      "white": "Kosteniuk, Alexandra",
+      "black": "Ju, Wenjun",
+      "result": "1/2-1/2",
+      "eco": "",
+      "opening": "Women’s Rapid World Championship",
+      "openingGroup": "Women’s Rapid World Championship",
+      "pgn": "[Event \"FIDE Women’s World Rapid Championships 2024\"]\n[Site \"New York, USA\"]\n[Date \"27.12.2024\"]\n[Round \"?\"]\n[White \"Kosteniuk, Alexandra\"]\n[Black \"Ju, Wenjun\"]\n[Result \"1/2-1/2\"]\n[WhiteElo \"2486\"]\n[BlackElo \"2536\"]\n\n1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.d4 exd4 5.e5 d5 6.Bb5 Ne4 7.Nxd4 Bc5 8.Be3 O-O 9.Nxc6 bxc6 10.Bxc5 Nxc5 11.Bxc6 Rb8 12.Qxd5 Qe7 13.O-O Rxb2 14.Nc3 Rxc2 15.Qd4 Ne6 16.Qd3 Rb2 17.Nd5 Qc5 18.Rac1 Qd4 19.Qa3 Qxe5 20.Ne7+ Kh8 21.Nxc8 Rxc8 22.Bd7 Rcb8 23.Bxe6 Qxe6 24.Qxa7 Qxa2 25.Qxa2 Rxa2 26.Rxc7 Kg8 27.Rfc1 g6 28.Rc8+ Rxc8 29.Rxc8+ Kg7 1/2-1/2"
+    },
+    {
+      "id": "ju-3",
+      "event": "FIDE Women’s World Rapid Championships 2024",
+      "site": "New York, USA",
+      "date": "27.12.2024",
+      "round": "",
+      "white": "Ju, Wenjun",
+      "black": "Lagno, Kateryna",
+      "result": "1/2-1/2",
+      "eco": "",
+      "opening": "Women’s Rapid World Championship",
+      "openingGroup": "Women’s Rapid World Championship",
+      "pgn": "[Event \"FIDE Women’s World Rapid Championships 2024\"]\n[Site \"New York, USA\"]\n[Date \"27.12.2024\"]\n[Round \"?\"]\n[White \"Ju, Wenjun\"]\n[Black \"Lagno, Kateryna\"]\n[Result \"1/2-1/2\"]\n[WhiteElo \"2536\"]\n[BlackElo \"2433\"]\n\n1.d4 Nf6 2.c4 e6 3.Nc3 d5 4.cxd5 exd5 5.Bg5 c6 6.e3 Bd6 7.Bd3 O-O 8.Nge2 Re8 9.h3 Nbd7 10.Qc2 Nf8 11.O-O Ng6 12.Rfe1 h6 13.Bxf6 Qxf6 14.e4 dxe4 15.Nxe4 Qd8 16.Nxd6 Qxd6 17.Qc5 Qxc5 18.dxc5 Be6 19.Nc3 Nf4 20.Bf1 Bf5 21.Rxe8+ Rxe8 22.Rd1 Kf8 1/2-1/2"
+    },
+    {
+      "id": "ju-4",
+      "event": "FIDE Women’s World Rapid Championships 2024",
+      "site": "New York, USA",
+      "date": "28.12.2024",
+      "round": "",
+      "white": "Ju, Wenjun",
+      "black": "Dronavalli, Harika",
+      "result": "1/2-1/2",
+      "eco": "",
+      "opening": "Women’s Rapid World Championship",
+      "openingGroup": "Women’s Rapid World Championship",
+      "pgn": "[Event \"FIDE Women’s World Rapid Championships 2024\"]\n[Site \"New York, USA\"]\n[Date \"28.12.2024\"]\n[Round \"?\"]\n[White \"Ju, Wenjun\"]\n[Black \"Dronavalli, Harika\"]\n[Result \"1/2-1/2\"]\n[WhiteElo \"2536\"]\n[BlackElo \"2416\"]\n\n1.e4 e6 2.d4 d5 3.exd5 exd5 4.Nf3 Nf6 5.Bd3 Bd6 6.Qe2+ Qe7 7.Qxe7+ Kxe7 8.O-O Nc6 9.Re1+ Be6 10.c3 h6 11.Ne5 Bxe5 12.dxe5 Nd7 13.f4 g6 14.b4 Nb6 15.Nd2 Na4 16.b5 Na5 17.Ba3+ Kd7 18.Bc2 Nb6 19.Bb4 Nbc4 20.Nb3 b6 21.Bxa5 Nxa5 22.Nxa5 bxa5 23.Red1 Ke7 24.g4 Rhg8 25.Kf2 Bxg4 26.Rxd5 Rad8 27.Rxd8 Rxd8 28.Ke3 Be6 29.Bd3 f6 30.Bxg6 fxe5 31.fxe5 Rd5 32.c4 Rxe5+ 33.Kd4 Kd6 34.a4 Rc5 35.Bd3 Rh5 36.Re1 Rxh2 37.c5+ Kd7 38.Rg1 Rh4+ 39.Kc3 Rxa4 40.Rg7+ Kd8 41.Rh7 Ra3+ 42.Kc2 Ra2+ 43.Kc3 Ra3+ 44.Kc2 Ra2+ 45.Kc3 Ra3+ 46.Kc2 1/2-1/2"
+    },
+    {
+      "id": "ju-5",
+      "event": "FIDE Women’s World Rapid Championships 2024",
+      "site": "New York, USA",
+      "date": "27.12.2024",
+      "round": "",
+      "white": "Ju, Wenjun",
+      "black": "Lee, Alice",
+      "result": "1-0",
+      "eco": "",
+      "opening": "Women’s Rapid World Championship",
+      "openingGroup": "Women’s Rapid World Championship",
+      "pgn": "[Event \"FIDE Women’s World Rapid Championships 2024\"]\n[Site \"New York, USA\"]\n[Date \"27.12.2024\"]\n[Round \"?\"]\n[White \"Ju, Wenjun\"]\n[Black \"Lee, Alice\"]\n[Result \"1-0\"]\n[WhiteElo \"2536\"]\n[BlackElo \"2415\"]\n\n1.d4 Nf6 2.c4 e6 3.Nc3 d5 4.cxd5 exd5 5.Bg5 Bb4 6.e3 h6 7.Bxf6 Qxf6 8.a3 Bxc3+ 9.bxc3 O-O 10.Ne2 c5 11.Nf4 Rd8 12.Be2 Nc6 13.O-O c4 14.Bf3 Ne7 15.Rb1 Rb8 16.Rb5 Qa6 17.Qb1 Qxa3 18.Nxd5 Nxd5 19.Bxd5 Qxc3 20.Rc1 Qa3 21.Bxc4 b6 22.h3 Qf8 23.Qa2 a6 24.Rb2 b5 25.Bb3 Qe7 26.Qa5 Bb7 27.Qc7 Qf6 28.Qg3 Rbc8 29.Rbc2 Rxc2 30.Rxc2 Bd5 31.Bxd5 Rxd5 32.Rc8+ Rd8 33.Qc7 Rxc8 34.Qxc8+ Kh7 35.Qc5 g5 36.d5 Qa1+ 37.Kh2 Qe5+ 38.g3 Qf5 39.Kg1 Qb1+ 40.Kg2 Qe4+ 41.Kh2 Qf5 42.e4 Qxe4 43.d6 Qd3 44.Qc7 Qf5 45.Qa7 Qd5 46.d7 b4 47.Qc7 Qf5 48.Kg1 Qb1+ 49.Kg2 Qe4+ 50.Kf1 Qd3+ 51.Ke1 Qe4+ 52.Kd2 Qd4+ 53.Kc2 Qe4+ 54.Kb2 Qd4+ 55.Kb3 Qd1+ 56.Kxb4 Qd2+ 57.Kc5 Qxf2+ 58.Kc6 Qf3+ 59.Kb6 Qb3+ 60.Ka7 Qe3+ 61.Kb7 Qb3+ 62.Qb6 Qd5+ 63.Kc7 Qe5+ 64.Kc8 Qf5 65.g4 Qc2+ 66.Qc7 Qe4 67.d8=Q Qa8+ 68.Kd7 Qd5+ 69.Ke8 Qe4+ 70.Kxf7 Qg6+ 71.Kf8+ 1-0"
+    }
+  ]
+}
