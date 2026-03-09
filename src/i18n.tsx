@@ -21,6 +21,7 @@ type TranslationTree = {
     email: string;
     leaveMessage: string;
     visits: string;
+    puzzles: string;
     startingPosition: string;
     statusBar: string;
     vs: string;
@@ -179,6 +180,7 @@ const translations: Record<Language, TranslationTree> = {
       email: '邮箱',
       leaveMessage: '给作者留言',
       visits: '访问次数',
+      puzzles: 'Puzzles',
       startingPosition: '初始局面',
       statusBar: '← → 导航 · F 翻转棋盘',
       vs: '对',
@@ -347,6 +349,7 @@ const translations: Record<Language, TranslationTree> = {
       email: 'Email',
       leaveMessage: 'Leave a message',
       visits: 'Visits',
+      puzzles: 'Puzzles',
       startingPosition: 'Starting position',
       statusBar: '← → navigate · F flip board',
       vs: 'vs',

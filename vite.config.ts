@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -11,6 +12,14 @@ export default defineConfig(() => {
   return {
     base,
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          puzzles: fileURLToPath(new URL('./puzzles.html', import.meta.url)),
+        },
+      },
+    },
     worker: {
       format: 'es',
     },

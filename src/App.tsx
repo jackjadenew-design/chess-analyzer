@@ -1165,6 +1165,14 @@ function AppShell() {
         </div>
 
         <div className="flex justify-end gap-2">
+          <a
+            href={`${import.meta.env.BASE_URL}puzzles.html`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-10 items-center rounded-lg border border-surface-600 px-3 text-xs font-semibold text-surface-300 transition-colors hover:border-accent-400/40 hover:text-accent-400"
+          >
+            {strings.app.puzzles}
+          </a>
           <div
             title={strings.app.visits}
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-surface-600 bg-surface-800/90 px-3 text-xs font-semibold text-surface-300"
