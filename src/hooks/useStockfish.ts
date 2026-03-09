@@ -26,22 +26,34 @@ const DEFAULT_EVAL: EngineEval = {
 };
 
 const BASE_URL = import.meta.env.BASE_URL;
+const STOCKFISH_18_READY_TIMEOUT_MS = 5000;
+
+type EngineWorkerConfig = {
+  script: string;
+  wasm?: string;
+};
 
 const ENGINE_WORKERS: Record<
   EngineVersion,
-  { script: string; wasm?: string }
+  EngineWorkerConfig[]
 > = {
-  stockfish16: {
-    script: `${BASE_URL}engines/stockfish16/stockfish-nnue-16-single.js`,
-  },
-  stockfish18: {
-    script: `${BASE_URL}stockfish/stockfish-18-lite-single.js`,
-    wasm: `${BASE_URL}stockfish/stockfish-18-lite-single.wasm`,
-  },
+  stockfish16: [
+    {
+      script: `${BASE_URL}engines/stockfish16/stockfish-nnue-16-single.js`,
+    },
+  ],
+  stockfish18: [
+    {
+      script: `${BASE_URL}stockfish/stockfish-18-lite-single.js`,
+      wasm: `${BASE_URL}stockfish/stockfish-18-lite-single.wasm`,
+    },
+    {
+      script: `${BASE_URL}stockfish/stockfish-18-asm.js`,
+    },
+  ],
 };
 
-function getWorkerUrl(engineVersion: EngineVersion): string {
-  const config = ENGINE_WORKERS[engineVersion];
+function getWorkerUrl(config: EngineWorkerConfig): string {
   if (!config.wasm || typeof window === 'undefined') {
     return config.script;
   }
@@ -133,6 +145,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
 
   const workerRef = useRef<Worker | null>(null);
   const debounceRef = useRef<number | null>(null);
+  const readyTimeoutRef = useRef<number | null>(null);
   const lastFenRef = useRef<string | null>(null);
   const turnRef = useRef(true);
   const linesRef = useRef<ParsedPvLine[]>([]);
@@ -166,21 +179,34 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       return;
     }
 
-    let worker: Worker;
-
     setIsEngineReady(false);
     setEngineError(null);
     setEvalData(DEFAULT_EVAL);
+    const workerConfigs = ENGINE_WORKERS[engineVersion];
+    let worker: Worker | null = null;
+    let isDisposed = false;
+    let activeWorkerIndex = 0;
+    let readyReceived = false;
 
-    try {
-      worker = new Worker(getWorkerUrl(engineVersion));
-    } catch (error) {
-      setEngineError(
-        error instanceof Error ? error.message : 'Failed to create Stockfish worker.'
-      );
-      setEvalData((current) => ({ ...current, engineError: true }));
-      return;
-    }
+    const clearReadyTimeout = () => {
+      if (readyTimeoutRef.current) {
+        window.clearTimeout(readyTimeoutRef.current);
+        readyTimeoutRef.current = null;
+      }
+    };
+
+    const cleanupWorker = () => {
+      clearReadyTimeout();
+      if (!worker) return;
+      try {
+        worker.postMessage('quit');
+      } catch {
+        // Ignore shutdown errors during worker replacement.
+      }
+      worker.terminate();
+      worker = null;
+      workerRef.current = null;
+    };
 
     const handleOutput = (line: string) => {
       if (line === 'uciok') {
@@ -190,6 +216,8 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       }
 
       if (line === 'readyok') {
+        readyReceived = true;
+        clearReadyTimeout();
         setIsEngineReady(true);
         setEngineError(null);
         setEvalData((current) => ({ ...current, engineError: false }));
@@ -233,31 +261,78 @@ export function useStockfish(options: UseStockfishOptions = {}) {
       }
     };
 
-    worker.onmessage = ({ data }: MessageEvent<string>) => {
-      if (typeof data !== 'string') return;
-      handleOutput(data);
-    };
+    const startWorker = (index: number) => {
+      const config = workerConfigs[index];
+      if (!config || isDisposed) {
+        setIsEngineReady(false);
+        setEvalData((current) => ({ ...current, isRunning: false, engineError: true }));
+        setEngineError('Failed to initialize Stockfish engine.');
+        return;
+      }
 
-    worker.onerror = (event) => {
-      const details =
-        [event.message, event.filename, event.lineno ? `line ${event.lineno}` : null]
-          .filter(Boolean)
-          .join(' · ') || 'Stockfish worker crashed.';
-      setEngineError(details);
+      activeWorkerIndex = index;
+      cleanupWorker();
       setIsEngineReady(false);
-      setEvalData((current) => ({ ...current, isRunning: false, engineError: true }));
+      setEvalData(DEFAULT_EVAL);
+      readyReceived = false;
+
+      try {
+        worker = new Worker(getWorkerUrl(config));
+      } catch (error) {
+        if (index + 1 < workerConfigs.length) {
+          startWorker(index + 1);
+          return;
+        }
+        setEngineError(
+          error instanceof Error ? error.message : 'Failed to create Stockfish worker.'
+        );
+        setEvalData((current) => ({ ...current, engineError: true }));
+        return;
+      }
+
+      workerRef.current = worker;
+
+      worker.onmessage = ({ data }: MessageEvent<string>) => {
+        if (typeof data !== 'string') return;
+        handleOutput(data);
+      };
+
+      worker.onerror = (event) => {
+        const details =
+          [event.message, event.filename, event.lineno ? `line ${event.lineno}` : null]
+            .filter(Boolean)
+            .join(' · ') || 'Stockfish worker crashed.';
+
+        if (activeWorkerIndex + 1 < workerConfigs.length) {
+          startWorker(activeWorkerIndex + 1);
+          return;
+        }
+
+        clearReadyTimeout();
+        setEngineError(details);
+        setIsEngineReady(false);
+        setEvalData((current) => ({ ...current, isRunning: false, engineError: true }));
+      };
+
+      if (engineVersion === 'stockfish18' && index === 0) {
+        readyTimeoutRef.current = window.setTimeout(() => {
+          if (!isDisposed && !readyReceived && activeWorkerIndex === 0) {
+            startWorker(1);
+          }
+        }, STOCKFISH_18_READY_TIMEOUT_MS);
+      }
+
+      worker.postMessage('uci');
     };
 
-    workerRef.current = worker;
-    worker.postMessage('uci');
+    startWorker(0);
 
     return () => {
+      isDisposed = true;
       if (debounceRef.current) {
         window.clearTimeout(debounceRef.current);
       }
-      worker.postMessage('quit');
-      worker.terminate();
-      workerRef.current = null;
+      cleanupWorker();
     };
   }, [enabled, engineVersion, postCommand]);
 
