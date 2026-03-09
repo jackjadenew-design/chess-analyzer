@@ -77,6 +77,8 @@ function collectNodesForAnalysis(root: MoveNode): MoveNode[] {
 function createEmptyCounts(): MoveQualityCounts {
   return {
     brilliant: 0,
+    best: 0,
+    excellent: 0,
     good: 0,
     dubious: 0,
     mistake: 0,
@@ -92,6 +94,9 @@ const MATERIAL_VALUES: Record<string, number> = {
   q: 900,
   k: 0,
 };
+
+const WIN_PERCENT_CP_CLAMP = 1000;
+const MIN_MOVE_ACCURACY = 1;
 
 function toComparableScore(entry?: EngineEvalHistoryEntry): number | null {
   if (!entry) return null;
@@ -117,23 +122,126 @@ function winPercentFromScore(score: number): number {
   return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * score)) - 1);
 }
 
-function winningChanceDrop(
+function clampWinPercentScore(score: number): number {
+  return clamp(score, -WIN_PERCENT_CP_CLAMP, WIN_PERCENT_CP_CLAMP);
+}
+
+function getMoveWinPercentMetrics(
   previousScore: number,
   currentScore: number,
   ply: number
-): number {
+): {
+  before: number;
+  after: number;
+  drop: number;
+} {
   const moverSign = ply % 2 === 1 ? 1 : -1;
-  const bestWinPercent = winPercentFromScore(previousScore * moverSign);
-  const actualWinPercent = winPercentFromScore(currentScore * moverSign);
-  return Math.max(0, bestWinPercent - actualWinPercent);
+  const bestWinPercent = winPercentFromScore(
+    clampWinPercentScore(previousScore * moverSign)
+  );
+  const actualWinPercent = winPercentFromScore(
+    clampWinPercentScore(currentScore * moverSign)
+  );
+
+  return {
+    before: bestWinPercent,
+    after: actualWinPercent,
+    drop: Math.max(0, bestWinPercent - actualWinPercent),
+  };
 }
 
-function accuracyFromLoss(loss: number, previousScore: number, currentScore: number, ply: number): number {
-  const winDrop = winningChanceDrop(previousScore, currentScore, ply);
-  const mapped = 103.1668 * Math.exp(-0.04354 * winDrop) - 3.1669;
+function accuracyFromWinPercentDrop(winDrop: number): number {
+  if (winDrop <= 0) return 100;
 
-  if (loss <= 5) return 100;
-  return Math.max(0, Math.min(100, mapped));
+  const mapped = 103.1668 * Math.exp(-0.04354 * winDrop) - 3.1669;
+  return Math.max(MIN_MOVE_ACCURACY, Math.min(100, mapped));
+}
+
+function getMoveAccuracyMetrics(
+  previousScore: number,
+  currentScore: number,
+  ply: number
+): {
+  cpLoss: number;
+  winPercentBefore: number;
+  winPercentAfter: number;
+  winPercentDrop: number;
+  accuracy: number;
+} {
+  const cpLoss = centipawnLossForMove(previousScore, currentScore, ply);
+  const winPercentMetrics = getMoveWinPercentMetrics(previousScore, currentScore, ply);
+
+  return {
+    cpLoss,
+    winPercentBefore: winPercentMetrics.before,
+    winPercentAfter: winPercentMetrics.after,
+    winPercentDrop: winPercentMetrics.drop,
+    accuracy: accuracyFromWinPercentDrop(winPercentMetrics.drop),
+  };
+}
+
+function standardDeviation(values: number[]): number {
+  if (values.length <= 1) return 0;
+
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const variance =
+    values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
+
+  return Math.sqrt(variance);
+}
+
+function harmonicMean(values: number[]): number | null {
+  if (!values.length) return null;
+
+  const denominator = values.reduce(
+    (sum, value) => sum + 1 / Math.max(value, MIN_MOVE_ACCURACY),
+    0
+  );
+
+  return denominator > 0 ? values.length / denominator : null;
+}
+
+function getAccuracyWindowSize(moveCount: number): number {
+  if (moveCount <= 1) return 1;
+  return clamp(Math.round(Math.sqrt(moveCount)), 2, Math.min(8, moveCount));
+}
+
+function getVolatilityWeights(positionWinPercents: number[]): number[] {
+  if (!positionWinPercents.length) return [];
+
+  const windowSize = getAccuracyWindowSize(positionWinPercents.length);
+  const maxStart = Math.max(0, positionWinPercents.length - windowSize);
+
+  return positionWinPercents.map((_, index) => {
+    const rawStart = index - Math.floor(windowSize / 2);
+    const start = clamp(rawStart, 0, maxStart);
+    const end = Math.min(positionWinPercents.length, start + windowSize);
+    const volatility = standardDeviation(positionWinPercents.slice(start, end));
+
+    return Math.max(1, volatility);
+  });
+}
+
+function calculateGameAccuracy(
+  moveAccuracies: number[],
+  positionWinPercents: number[]
+): number | null {
+  if (!moveAccuracies.length) return null;
+
+  const weights = getVolatilityWeights(positionWinPercents);
+  const weightedTotal = moveAccuracies.reduce(
+    (sum, accuracy, index) => sum + accuracy * (weights[index] ?? 1),
+    0
+  );
+  const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
+  const weightedMean = weightSum > 0 ? weightedTotal / weightSum : null;
+  const harmonic = harmonicMean(moveAccuracies);
+
+  if (weightedMean === null && harmonic === null) return null;
+  if (weightedMean === null) return Number(harmonic?.toFixed(1));
+  if (harmonic === null) return Number(weightedMean.toFixed(1));
+
+  return Number((((weightedMean + harmonic) / 2)).toFixed(1));
 }
 
 function normalizeFenForComparison(fen: string): string {
@@ -178,6 +286,23 @@ function materialTotals(fen: string): Record<PlayerSide, number> {
   return totals;
 }
 
+function isBestMove(
+  previousNode: MoveNode,
+  previousEntry: EngineEvalHistoryEntry,
+  currentNode: MoveNode
+): boolean {
+  const actualMove = inferPlayedMoveUci(previousNode.fen, currentNode.fen);
+  if (!actualMove || !previousEntry.bestMove || actualMove !== previousEntry.bestMove) {
+    return false;
+  }
+
+  return true;
+}
+
+function isExcellentMove(metrics: ReturnType<typeof getMoveAccuracyMetrics>): boolean {
+  return metrics.winPercentDrop <= 2.5 && metrics.cpLoss <= 35;
+}
+
 function isBrilliantMove(
   previousNode: MoveNode,
   previousEntry: EngineEvalHistoryEntry,
@@ -186,25 +311,19 @@ function isBrilliantMove(
   currentScore: number
 ): boolean {
   const side: PlayerSide = currentNode.ply % 2 === 1 ? 'white' : 'black';
-  const opponent: PlayerSide = side === 'white' ? 'black' : 'white';
-  const actualMove = inferPlayedMoveUci(previousNode.fen, currentNode.fen);
-  if (!actualMove || !previousEntry.bestMove || actualMove !== previousEntry.bestMove) {
+  const moverSign = currentNode.ply % 2 === 1 ? 1 : -1;
+  if (!isBestMove(previousNode, previousEntry, currentNode)) {
     return false;
   }
 
   const beforeMaterial = materialTotals(previousNode.fen);
   const afterMaterial = materialTotals(currentNode.fen);
-  const ownDelta = afterMaterial[side] - beforeMaterial[side];
-  const opponentDelta = afterMaterial[opponent] - beforeMaterial[opponent];
-  const cpLoss = centipawnLossForMove(previousScore, currentScore, currentNode.ply);
-  const winDrop = winningChanceDrop(previousScore, currentScore, currentNode.ply);
+  const ownMaterialLoss = beforeMaterial[side] - afterMaterial[side];
+  const playedMoveEval = currentScore * moverSign;
 
   return (
-    ownDelta <= -100 &&
-    ownDelta < opponentDelta &&
-    cpLoss <= 15 &&
-    winDrop <= 2 &&
-    Math.abs(previousScore) < 500
+    ownMaterialLoss >= 100 &&
+    playedMoveEval >= 0
   );
 }
 
@@ -215,8 +334,7 @@ function classifyMoveQuality(
   previousScore: number,
   currentScore: number
 ): MoveQualityCategory {
-  const cpLoss = centipawnLossForMove(previousScore, currentScore, currentNode.ply);
-  const winDrop = winningChanceDrop(previousScore, currentScore, currentNode.ply);
+  const metrics = getMoveAccuracyMetrics(previousScore, currentScore, currentNode.ply);
 
   if (
     isBrilliantMove(
@@ -229,9 +347,13 @@ function classifyMoveQuality(
   ) {
     return 'brilliant';
   }
-  if (winDrop >= 20 || cpLoss >= 250) return 'blunder';
-  if (winDrop >= 10 || cpLoss >= 120) return 'mistake';
-  if (winDrop >= 4 || cpLoss >= 50) return 'dubious';
+  if (isBestMove(previousNode, previousEntry, currentNode)) {
+    return 'best';
+  }
+  if (isExcellentMove(metrics)) return 'excellent';
+  if (metrics.winPercentDrop >= 20 || metrics.cpLoss >= 250) return 'blunder';
+  if (metrics.winPercentDrop >= 10 || metrics.cpLoss >= 120) return 'mistake';
+  if (metrics.winPercentDrop >= 4 || metrics.cpLoss >= 50) return 'dubious';
   return 'good';
 }
 
@@ -923,8 +1045,14 @@ function AppShell() {
     };
 
     const accuracyBuckets = {
-      white: [] as number[],
-      black: [] as number[],
+      white: {
+        accuracies: [] as number[],
+        positionWinPercents: [] as number[],
+      },
+      black: {
+        accuracies: [] as number[],
+        positionWinPercents: [] as number[],
+      },
     };
 
     for (let index = 1; index < currentBranchPoints.length; index += 1) {
@@ -936,23 +1064,22 @@ function AppShell() {
       if (previousScore === null || currentScore === null) continue;
 
       const side = current.node.ply % 2 === 1 ? 'white' : 'black';
-      const loss = centipawnLossForMove(previousScore, currentScore, current.node.ply);
       const quality = currentBranchQualities[current.node.id]?.quality;
       if (!quality) continue;
+      const metrics = getMoveAccuracyMetrics(previousScore, currentScore, current.node.ply);
 
       summary[side].moveCount += 1;
       summary[side].counts[quality] += 1;
-      accuracyBuckets[side].push(
-        accuracyFromLoss(loss, previousScore, currentScore, current.node.ply)
-      );
+      accuracyBuckets[side].accuracies.push(metrics.accuracy);
+      accuracyBuckets[side].positionWinPercents.push(metrics.winPercentBefore);
       summary.analyzedMoves += 1;
     }
 
     (['white', 'black'] as const).forEach((side) => {
-      const bucket = accuracyBuckets[side];
-      if (!bucket.length) return;
-      const average = bucket.reduce((sum, value) => sum + value, 0) / bucket.length;
-      summary[side].accuracy = Number(average.toFixed(1));
+      summary[side].accuracy = calculateGameAccuracy(
+        accuracyBuckets[side].accuracies,
+        accuracyBuckets[side].positionWinPercents
+      );
     });
 
     return summary.analyzedMoves > 0 ? summary : null;

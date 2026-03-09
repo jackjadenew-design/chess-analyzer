@@ -66,11 +66,15 @@ type TranslationTree = {
     analyzedMoves: string;
     accuracy: string;
     brilliant: string;
+    best: string;
+    excellent: string;
     good: string;
     dubious: string;
     mistake: string;
     blunder: string;
     brilliantHint: string;
+    bestHint: string;
+    excellentHint: string;
     goodHint: string;
     dubiousHint: string;
     mistakeHint: string;
@@ -219,12 +223,16 @@ const translations: Record<Language, TranslationTree> = {
       analyzedMoves: '已分析着法',
       accuracy: '精度',
       brilliant: '妙手',
+      best: '最佳着',
+      excellent: '优秀着',
       good: '好棋',
       dubious: '疑问手',
       mistake: '错着',
       blunder: '大漏着',
-      brilliantHint: '妙手：接近最佳着，并且通常包含有价值的非平凡牺牲或强制性战术资源。',
-      goodHint: '好棋：基本保持当前局面的最佳思路，评估损失很小。',
+      brilliantHint: '妙手：这是最佳着，并且伴随即时子力牺牲，牺牲后评估仍不落下风。',
+      bestHint: '最佳着：与引擎推荐的最佳着一致，最佳着评估与实战着评估几乎没有差距。',
+      excellentHint: '优秀着：不是引擎第一选择，但与最佳着非常接近，胜率损失极小。',
+      goodHint: '好棋：不是最佳着，但保留了大部分胜率，没有造成明显损失。',
       dubiousHint: '疑问手：不是明显坏棋，但让局面质量出现了可见下降。',
       mistakeHint: '错着：带来了较明显的评估下滑，错过了更强的走法。',
       blunderHint: '大漏着：造成重大失误，通常会显著丢失优势、进入败势或错过关键防守。',
@@ -382,12 +390,16 @@ const translations: Record<Language, TranslationTree> = {
       analyzedMoves: 'Analyzed moves',
       accuracy: 'Accuracy',
       brilliant: 'Brilliant',
+      best: 'Best',
+      excellent: 'Excellent',
       good: 'Good',
       dubious: 'Dubious',
       mistake: 'Mistake',
       blunder: 'Blunder',
-      brilliantHint: 'Brilliant: near-best move that usually involves a valuable non-trivial sacrifice or forcing resource.',
-      goodHint: 'Good: follows the best plan closely and loses very little evaluation.',
+      brilliantHint: 'Brilliant: the move is best, includes an immediate material sacrifice, and the resulting evaluation stays non-negative.',
+      bestHint: 'Best: matches the engine’s best move and leaves little to no gap between best-move eval and played-move eval.',
+      excellentHint: 'Excellent: not the engine’s top move, but it stays very close to best and loses only a tiny amount of winning chances.',
+      goodHint: 'Good: not the engine’s top move, but it preserves most of the winning chances and avoids meaningful damage.',
       dubiousHint: 'Dubious: not a clear mistake, but it causes a noticeable drop in position quality.',
       mistakeHint: 'Mistake: a clearly inferior move that causes a meaningful evaluation loss.',
       blunderHint: 'Blunder: a major error that usually throws away advantage, misses critical defense, or loses heavily.',

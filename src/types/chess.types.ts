@@ -56,6 +56,8 @@ export interface EngineEvalHistoryEntry {
 
 export type MoveQualityCategory =
   | 'brilliant'
+  | 'best'
+  | 'excellent'
   | 'good'
   | 'dubious'
   | 'mistake'
@@ -65,6 +67,8 @@ export type PlayerSide = 'white' | 'black';
 
 export interface MoveQualityCounts {
   brilliant: number;
+  best: number;
+  excellent: number;
   good: number;
   dubious: number;
   mistake: number;

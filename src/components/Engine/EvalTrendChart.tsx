@@ -67,6 +67,8 @@ export default function EvalTrendChart({
   const { strings } = useI18n();
   const qualityOrder: MoveQualityCategory[] = [
     'brilliant',
+    'best',
+    'excellent',
     'good',
     'dubious',
     'mistake',
@@ -74,6 +76,8 @@ export default function EvalTrendChart({
   ];
   const qualityHints: Record<MoveQualityCategory, string> = {
     brilliant: strings.engine.brilliantHint,
+    best: strings.engine.bestHint,
+    excellent: strings.engine.excellentHint,
     good: strings.engine.goodHint,
     dubious: strings.engine.dubiousHint,
     mistake: strings.engine.mistakeHint,
