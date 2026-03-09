@@ -27,10 +27,31 @@ const DEFAULT_EVAL: EngineEval = {
 
 const BASE_URL = import.meta.env.BASE_URL;
 
-const ENGINE_WORKERS: Record<EngineVersion, string> = {
-  stockfish16: `${BASE_URL}engines/stockfish16/stockfish-nnue-16-single.js`,
-  stockfish18: `${BASE_URL}stockfish/stockfish-18-lite-single.js`,
+const ENGINE_WORKERS: Record<
+  EngineVersion,
+  { script: string; wasm?: string }
+> = {
+  stockfish16: {
+    script: `${BASE_URL}engines/stockfish16/stockfish-nnue-16-single.js`,
+  },
+  stockfish18: {
+    script: `${BASE_URL}stockfish/stockfish-18-lite-single.js`,
+    wasm: `${BASE_URL}stockfish/stockfish-18-lite-single.wasm`,
+  },
 };
+
+function getWorkerUrl(engineVersion: EngineVersion): string {
+  const config = ENGINE_WORKERS[engineVersion];
+  if (!config.wasm || typeof window === 'undefined') {
+    return config.script;
+  }
+
+  const scriptUrl = new URL(config.script, window.location.origin);
+  const wasmUrl = new URL(config.wasm, window.location.origin);
+  scriptUrl.hash = `${encodeURIComponent(wasmUrl.toString())},worker`;
+
+  return scriptUrl.toString();
+}
 
 function toWhitePerspective(value: number, isWhiteTurn: boolean): number {
   return isWhiteTurn ? value : -value;
@@ -152,7 +173,7 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     setEvalData(DEFAULT_EVAL);
 
     try {
-      worker = new Worker(ENGINE_WORKERS[engineVersion]);
+      worker = new Worker(getWorkerUrl(engineVersion));
     } catch (error) {
       setEngineError(
         error instanceof Error ? error.message : 'Failed to create Stockfish worker.'
@@ -218,7 +239,11 @@ export function useStockfish(options: UseStockfishOptions = {}) {
     };
 
     worker.onerror = (event) => {
-      setEngineError(event.message || 'Stockfish worker crashed.');
+      const details =
+        [event.message, event.filename, event.lineno ? `line ${event.lineno}` : null]
+          .filter(Boolean)
+          .join(' · ') || 'Stockfish worker crashed.';
+      setEngineError(details);
       setIsEngineReady(false);
       setEvalData((current) => ({ ...current, isRunning: false, engineError: true }));
     };
