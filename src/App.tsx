@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
-import { Crown, Plus, AlertTriangle, FileInput, Info } from 'lucide-react';
+import { Crown, Plus, AlertTriangle, FileInput, Info, Eye } from 'lucide-react';
 
 import { useChessTree } from './hooks/useChessTree';
 import { useChessGame } from './hooks/useChessGame';
@@ -35,6 +35,10 @@ import { parsePgn } from './utils/pgn';
 
 type SideTab = 'info' | 'moves' | 'pgn';
 const DEFAULT_GAME_ANALYSIS_DEPTH = 16;
+const VISITOR_COUNTER_API_BASE = 'https://api.counterapi.dev/v1';
+const VISITOR_COUNTER_NAMESPACE = 'jackjadenew-design.github.io';
+const VISITOR_COUNTER_KEY = 'chess-analyzer-site';
+const VISITOR_COUNTER_SESSION_KEY = 'chess-analyzer-visit-tracked';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -553,6 +557,7 @@ export default function App() {
 function AppShell() {
   const { language, setLanguage, strings } = useI18n();
   const [theme, setTheme] = useState<Theme>('dark');
+  const [visitCount, setVisitCount] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<SideTab>('moves');
   const [engineEnabled, setEngineEnabled] = useState(true);
   const [engineVersion, setEngineVersion] = useState<EngineVersion>('stockfish16');
@@ -593,6 +598,54 @@ function AppShell() {
     updateDesktop();
     media.addEventListener('change', updateDesktop);
     return () => media.removeEventListener('change', updateDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const trackedThisSession =
+      window.sessionStorage.getItem(VISITOR_COUNTER_SESSION_KEY) === '1';
+    const action = trackedThisSession ? '' : '/up';
+    const endpoint =
+      `${VISITOR_COUNTER_API_BASE}/${encodeURIComponent(VISITOR_COUNTER_NAMESPACE)}` +
+      `/${encodeURIComponent(VISITOR_COUNTER_KEY)}${action}`;
+
+    let cancelled = false;
+
+    const loadVisitCount = async () => {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          cache: 'no-store',
+        });
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as { count?: number; value?: number };
+        const nextCount =
+          typeof payload.count === 'number'
+            ? payload.count
+            : typeof payload.value === 'number'
+            ? payload.value
+            : null;
+
+        if (cancelled || nextCount === null) return;
+        setVisitCount(nextCount);
+
+        if (!trackedThisSession) {
+          window.sessionStorage.setItem(VISITOR_COUNTER_SESSION_KEY, '1');
+        }
+      } catch {
+        if (!cancelled) {
+          setVisitCount(null);
+        }
+      }
+    };
+
+    void loadVisitCount();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -1112,6 +1165,17 @@ function AppShell() {
         </div>
 
         <div className="flex justify-end gap-2">
+          <div
+            title={strings.app.visits}
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-surface-600 bg-surface-800/90 px-3 text-xs font-semibold text-surface-300"
+          >
+            <Eye size={14} className="text-accent-400" />
+            <span className="font-mono text-[12px]">
+              {visitCount === null
+                ? '--'
+                : visitCount.toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')}
+            </span>
+          </div>
           <button
             onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
             title={strings.app.switchLanguage}

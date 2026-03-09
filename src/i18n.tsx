@@ -20,6 +20,7 @@ type TranslationTree = {
     author: string;
     email: string;
     leaveMessage: string;
+    visits: string;
     startingPosition: string;
     statusBar: string;
     vs: string;
@@ -177,6 +178,7 @@ const translations: Record<Language, TranslationTree> = {
       author: '赵少杰',
       email: '邮箱',
       leaveMessage: '给作者留言',
+      visits: '访问次数',
       startingPosition: '初始局面',
       statusBar: '← → 导航 · F 翻转棋盘',
       vs: '对',
@@ -344,6 +346,7 @@ const translations: Record<Language, TranslationTree> = {
       author: 'Shaojie Zhao',
       email: 'Email',
       leaveMessage: 'Leave a message',
+      visits: 'Visits',
       startingPosition: 'Starting position',
       statusBar: '← → navigate · F flip board',
       vs: 'vs',
